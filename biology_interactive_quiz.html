@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biology Quiz - 10 Questions</title>
+<style>
+:root{--navy:#102d46;--blue:#2563eb;--pale:#eaf4ff;--green:#dcfce7;--red:#fee2e2}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,"Noto Sans Devanagari",sans-serif;background:#f1f5f9;color:#172033;padding:16px}
+main{max-width:720px;margin:20px auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 10px 35px #102d4618}
+header{background:var(--navy);color:white;padding:24px}
+header h1{margin:0 0 6px;font-size:clamp(24px,5vw,34px)}
+header p{margin:0;color:#c7dcec}
+.progressrow{display:flex;justify-content:space-between;gap:10px;margin-top:22px;font-size:14px}
+.track{height:7px;background:#365166;border-radius:99px;overflow:hidden;margin-top:9px}
+#bar{height:100%;width:10%;background:#7dd3fc;transition:width .2s}
+.content{padding:clamp(18px,4vw,30px)}
+.badge{font-size:12px;font-weight:bold;letter-spacing:1px;color:#2563eb}
+h2{font-size:clamp(20px,4vw,27px);line-height:1.45;margin:12px 0 22px}
+.option{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:13px;margin:10px 0;border:1px solid #cbd5e1;border-radius:12px;background:#fff;font-size:16px;cursor:pointer;color:#172033}
+.letter{display:grid;place-items:center;flex:0 0 34px;height:34px;border-radius:9px;background:#e5e7eb;font-weight:bold}
+.option.selected{border:2px solid var(--blue);background:var(--pale)}
+.option.correct{border:2px solid #16a34a;background:var(--green)}
+.option.wrong{border:2px solid #dc2626;background:var(--red)}
+.option:disabled{cursor:default}
+button.primary{width:100%;border:0;border-radius:12px;background:var(--blue);color:white;padding:15px;font-size:16px;font-weight:bold;cursor:pointer;margin-top:14px}
+button.primary:disabled{opacity:.45;cursor:not-allowed}
+.feedback{padding:14px;border-radius:12px;margin-top:16px;line-height:1.6}
+.feedback.good{background:var(--green);color:#166534}
+.feedback.bad{background:var(--red);color:#991b1b}
+.small{font-size:13px;color:#64748b;text-align:center;margin:18px 0 0}
+.result{text-align:center;padding:15px 0}
+.score{font-size:50px;font-weight:bold;color:#2563eb;margin:14px}
+.hidden{display:none}
+footer{text-align:center;color:#64748b;font-size:12px;padding:0 20px 22px}
+@media(max-width:480px){body{padding:8px}main{margin:8px auto;border-radius:15px}.option{font-size:15px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>🧠 Biology Quiz</h1>
+  <p>अपना ज्ञान परखें — 10 सवाल</p>
+  <div class="progressrow"><span id="progressText">सवाल 1 / 10</span><span id="scoreText">स्कोर: 0 / 10</span></div>
+  <div class="track"><div id="bar"></div></div>
+</header>
+<section class="content" id="quiz">
+  <div class="badge" id="badge">QUESTION 1</div>
+  <h2 id="question"></h2>
+  <div id="options"></div>
+  <div id="feedback" class="feedback hidden" aria-live="polite"></div>
+  <button class="primary" id="checkBtn" disabled>Check Your Answer</button>
+  <p class="small">पहले विकल्प चुनें, फिर Check Your Answer दबाएँ।</p>
+</section>
+<section class="content hidden" id="result">
+  <div class="result">
+    <div style="font-size:52px">🏆</div>
+    <h2>Quiz पूरा हुआ!</h2>
+    <p>आपका अंतिम स्कोर</p>
+    <div class="score" id="finalScore">0 / 10</div>
+    <h3 id="message"></h3>
+    <p id="percentage"></p>
+  </div>
+  <button class="primary" id="restartBtn">फिर से Quiz दें</button>
+</section>
+<footer>Educational quiz • अपने ज्ञान को बेहतर बनाते रहें</footer>
+</main>
+<script>
+const questions = [
+ {q:"मानव शरीर में रक्त पंप करने वाला अंग कौन-सा है?",o:["फेफड़े","हृदय","गुर्दे","मस्तिष्क"],a:1,e:"हृदय रक्त को पूरे शरीर में पंप करता है।"},
+ {q:"पौधे अपना भोजन किस प्रक्रिया से बनाते हैं?",o:["श्वसन","पाचन","प्रकाश संश्लेषण","वाष्पोत्सर्जन"],a:2,e:"प्रकाश संश्लेषण में पौधे सूर्य के प्रकाश की मदद से भोजन बनाते हैं।"},
+ {q:"मानव शरीर का सबसे बड़ा अंग कौन-सा है?",o:["यकृत","हृदय","त्वचा","फेफड़ा"],a:2,e:"त्वचा मानव शरीर का सबसे बड़ा अंग है।"},
+ {q:"रक्त में ऑक्सीजन ले जाने का मुख्य काम कौन करता है?",o:["लाल रक्त कोशिकाएँ","श्वेत रक्त कोशिकाएँ","प्लेटलेट्स","प्लाज्मा प्रोटीन"],a:0,e:"लाल रक्त कोशिकाओं में हीमोग्लोबिन ऑक्सीजन ले जाने में मदद करता है।"},
+ {q:"वयस्क मनुष्य के सामान्यतः कितने स्थायी दाँत होते हैं?",o:["28","30","32","36"],a:2,e:"अधिकांश वयस्कों के पूर्ण स्थायी दाँतों की संख्या 32 होती है।"},
+ {q:"पौधों की पत्तियों का हरा रंग किसके कारण होता है?",o:["हीमोग्लोबिन","क्लोरोफिल","इंसुलिन","मेलानिन"],a:1,e:"क्लोरोफिल प्रकाश संश्लेषण के लिए प्रकाश ऊर्जा अवशोषित करता है।"},
+ {q:"मानव शरीर में इंसुलिन कौन-सा अंग बनाता है?",o:["अग्न्याशय","थायरॉइड","पित्ताशय","प्लीहा"],a:0,e:"अग्न्याशय की बीटा कोशिकाएँ इंसुलिन बनाती हैं।"},
+ {q:"मनुष्य की कोशिकीय श्वसन प्रक्रिया में कौन-सी गैस उपयोग होती है?",o:["नाइट्रोजन","कार्बन डाइऑक्साइड","ऑक्सीजन","हाइड्रोजन"],a:2,e:"कोशिकीय श्वसन में शरीर ऑक्सीजन का उपयोग करता है।"},
+ {q:"जीवों की आनुवंशिक जानकारी मुख्य रूप से किसमें होती है?",o:["DNA","वसा","ग्लूकोज","स्टार्च"],a:0,e:"DNA में जीव की आनुवंशिक जानकारी संग्रहित होती है।"},
+ {q:"गुर्दों का प्रमुख कार्य क्या है?",o:["रक्त पंप करना","रक्त को छानकर अपशिष्ट निकालना","भोजन चबाना","ऑक्सीजन बनाना"],a:1,e:"गुर्दे रक्त को छानते हैं और मूत्र के माध्यम से अपशिष्ट निकालने में मदद करते हैं।"}
+];
+let index=0, chosen=null, checked=false, score=0;
+const $=id=>document.getElementById(id);
+function render(){
+ const item=questions[index]; chosen=null; checked=false;
+ $("progressText").textContent=`सवाल ${index+1} / ${questions.length}`;
+ $("scoreText").textContent=`स्कोर: ${score} / ${questions.length}`;
+ $("bar").style.width=`${(index+1)/questions.length*100}%`;
+ $("badge").textContent=`QUESTION ${index+1}`;
+ $("question").textContent=item.q;
+ $("feedback").className="feedback hidden"; $("feedback").textContent="";
+ $("checkBtn").textContent="Check Your Answer"; $("checkBtn").disabled=true;
+ $("options").innerHTML="";
+ item.o.forEach((label,i)=>{
+   const b=document.createElement("button"); b.className="option";
+   b.innerHTML=`<span class="letter">${"ABCD"[i]}</span><span></span>`;
+   b.children[1].textContent=label;
+   b.addEventListener("click",()=>{if(checked)return;chosen=i;document.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");$("checkBtn").disabled=false;});
+   $("options").appendChild(b);
+ });
+}
+$("checkBtn").addEventListener("click",()=>{
+ if(!checked){
+   if(chosen===null)return;
+   checked=true;const item=questions[index];const buttons=[...document.querySelectorAll(".option")];
+   buttons.forEach((b,i)=>{b.disabled=true;if(i===item.a)b.classList.add("correct");else if(i===chosen)b.classList.add("wrong");});
+   const good=chosen===item.a;if(good)score++;
+   $("scoreText").textContent=`स्कोर: ${score} / ${questions.length}`;
+   $("feedback").className=`feedback ${good?"good":"bad"}`;
+   $("feedback").textContent=`${good?"✓ सही जवाब!":"✗ गलत जवाब। सही उत्तर: "+item.o[item.a]+". "} ${item.e}`;
+   $("checkBtn").textContent=index===questions.length-1?"Final Score देखें":"Next Question";
+ }else{
+   if(index<questions.length-1){index++;render();}
+   else{ $("quiz").classList.add("hidden");$("result").classList.remove("hidden");$("finalScore").textContent=`${score} / ${questions.length}`;$("percentage").textContent=`प्रतिशत: ${score*10}%`;$("message").textContent=score>=9?"शानदार!":score>=7?"बहुत अच्छा!":score>=5?"अच्छा प्रयास!":"अभ्यास जारी रखें!";}
+ }
+});
+$("restartBtn").addEventListener("click",()=>{index=0;score=0;$("result").classList.add("hidden");$("quiz").classList.remove("hidden");render();});
+render();
+</script>
+</body>
+</html>
